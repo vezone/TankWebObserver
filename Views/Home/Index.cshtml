@@ -1,0 +1,86 @@
+﻿<p>Список клиентов</p>
+<div id="result">
+    
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        
+        //setInterval(GetPlayers, 1000);
+
+        $(document).ready(function (event) {
+            setInterval(GetPlayers, 200);
+        });
+
+        function GetPlayers() {
+            $.ajax({
+                url: '/api/values',
+                type: 'GET',
+                dataType: "text",
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#result').text('Error' + jqXHR.responseText || textStatus);
+                }
+            });
+        }
+
+        function WriteResponse(data) {
+            var result_html =
+                '<table><th>Id</th><th>Nickname</th><th>Score</th><th>Hp</th><th>MaxHp</th><th>Tank position</th>';
+            var arr = data.replace("\"", "").replace("\"", "").split("|");
+            for (var i = 0; i < arr.length; i += 6) {
+                result_html +=
+                    '<tr>' +
+                    '<td>' + arr[i] + '</td>' +
+                    '<td>' + arr[i + 1] + '</td>' +
+                    '<td>' + arr[i + 2] + '</td>' +
+                    '<td>' + arr[i + 3] + '</td>' +
+                    '<td>' + arr[i + 4] + '</td>' +
+                    '<td>' + arr[i + 5] + '</td>' +
+                    '</tr>';
+            };
+            result_html += "</table>";
+            $("#result").html(result_html);
+        }
+
+        //Legacy
+        //function GetPlayers() {
+        //    $.ajax({
+        //        url: '/api/values',
+        //        type: 'GET',
+        //        dataType: 'text',
+        //        success: function (data) {
+        //            $('#result').html(data);
+        //        },
+        //        error: function (jqXHR, textStatus, errorThrown) {
+        //            output.html('ERROR!!!');
+        //            $('#result').text('Error' + jqXHR.responseText || textStatus);
+        //        }
+        //    });
+        //}
+        
+        //Legacy
+        //function GetPlayers() {
+        //    $.ajax({
+        //        url: '/api/values',
+        //        type: 'GET',
+        //        dataType: "text",
+        //        accepts: {
+        //            text: "application/x-players"
+        //        },
+        //        success: function (data) {
+        //            WriteResponse(data);
+        //        },
+        //        error: function (jqXHR, textStatus, errorThrown) {
+        //            $('#result').text('Error' + jqXHR.responseText || textStatus);
+        //        }
+        //    });
+        //}
+        
+
+    </script>
+
+}
