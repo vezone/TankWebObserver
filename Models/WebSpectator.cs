@@ -34,7 +34,7 @@ namespace TankWebObserver.Models
                     _map = request.Map;
                     _lastMapUpdate = DateTime.Now;
                 }
-                else if (null == _map)
+                else if (_map == null)
                 {
                     return new ServerResponse { ClientCommand = ClientCommandType.UpdateMap };
                 }
@@ -42,7 +42,7 @@ namespace TankWebObserver.Models
                 _map.InteractObjects = request.Map.InteractObjects;
                 _msgCount = msgCount;
                 _wasUpdate = true;
-
+            
                 return new ServerResponse { ClientCommand = ClientCommandType.UpdateMap };
             }
         }
@@ -62,9 +62,9 @@ namespace TankWebObserver.Models
                     _wasUpdate = false;
                     _map = new Map(_map, _map.InteractObjects);
                 }
-
+        
             }
-
+        
         }
     }
     

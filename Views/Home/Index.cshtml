@@ -3,17 +3,29 @@
     
 </div>
 
+<p>Интерактивные объекты</p>
+<div id="resultInteractObjects">
+
+</div>
+
+<p>Карта</p>
+<div id="cells">
+
+</div>
+
 @section scripts
 {
     <script type="text/javascript">
         
         //setInterval(GetPlayers, 1000);
 
-        $(document).ready(function (event) {
+        $(document).ready(function (event)
+        {
             setInterval(GetPlayers, 200);
         });
 
-        function GetPlayers() {
+        function GetPlayers()
+        {
             $.ajax({
                 url: '/api/values',
                 type: 'GET',
@@ -27,58 +39,62 @@
             });
         }
 
-        function WriteResponse(data) {
+        function WriteResponse(data)
+        {
+            var arr = data.replace("\"", "").replace("\"", "").split("+");
+            var playersData = arr[0].split("|");
+            var cellsDataAdd = arr[1].split("|");
+            var cellsData = arr[2].split("|");
+            var iteractObjectsData = arr[3].split("|");
+
+            var playersDataLength = playersData.length;
+            var cellsDataLength = cellsData.length;
+            var rowLength = Number(cellsDataAdd[0]);
+            var columnLength = Number(cellsDataAdd[1]);
+            var interactObjectsDataLength = iteractObjectsData.length;
+
+            var i;
             var result_html =
                 '<table><th>Id</th><th>Nickname</th><th>Score</th><th>Hp</th><th>MaxHp</th><th>Tank position</th>';
-            var arr = data.replace("\"", "").replace("\"", "").split("|");
-            for (var i = 0; i < arr.length; i += 6) {
+            for (i = 0; i < playersData.length; i += 6) {
                 result_html +=
                     '<tr>' +
-                    '<td>' + arr[i] + '</td>' +
-                    '<td>' + arr[i + 1] + '</td>' +
-                    '<td>' + arr[i + 2] + '</td>' +
-                    '<td>' + arr[i + 3] + '</td>' +
-                    '<td>' + arr[i + 4] + '</td>' +
-                    '<td>' + arr[i + 5] + '</td>' +
+                    '<td>' + playersData[i] + '</td>' +
+                    '<td>' + playersData[i + 1] + '</td>' +
+                    '<td>' + playersData[i + 2] + '</td>' +
+                    '<td>' + playersData[i + 3] + '</td>' +
+                    '<td>' + playersData[i + 4] + '</td>' +
+                    '<td>' + playersData[i + 5] + '</td>' +
                     '</tr>';
             };
             result_html += "</table>";
             $("#result").html(result_html);
-        }
 
-        //Legacy
-        //function GetPlayers() {
-        //    $.ajax({
-        //        url: '/api/values',
-        //        type: 'GET',
-        //        dataType: 'text',
-        //        success: function (data) {
-        //            $('#result').html(data);
-        //        },
-        //        error: function (jqXHR, textStatus, errorThrown) {
-        //            output.html('ERROR!!!');
-        //            $('#result').text('Error' + jqXHR.responseText || textStatus);
-        //        }
-        //    });
-        //}
-        
-        //Legacy
-        //function GetPlayers() {
-        //    $.ajax({
-        //        url: '/api/values',
-        //        type: 'GET',
-        //        dataType: "text",
-        //        accepts: {
-        //            text: "application/x-players"
-        //        },
-        //        success: function (data) {
-        //            WriteResponse(data);
-        //        },
-        //        error: function (jqXHR, textStatus, errorThrown) {
-        //            $('#result').text('Error' + jqXHR.responseText || textStatus);
-        //        }
-        //    });
-        //}
+            var j;
+            var result_interact_objects_html =
+                "<table><th>InteractObjectType</th><th>Object position</th>";
+            for (j = 2; j < interactObjectsDataLength; j += 2) {
+                result_interact_objects_html +=
+                    '<tr>' +
+                    '<td>' + iteractObjectsData[j] + '</td>' +
+                    '<td>' + iteractObjectsData[j + 1] + '</td>' +
+                    '</tr>';
+            };
+            result_interact_objects_html += "</table>";
+            $("#resultInteractObjects").html(result_interact_objects_html);
+            
+            var r;
+            var c;
+            var result_html = "";
+            for (r = 0; r < rowLength; r++) {
+                result_html += "<p>";
+                for (c = 0; c < columnLength; c++) {
+                    result_html += cellsData[r*columnLength + c];
+                }
+                result_html += "</p>";
+            }
+            $("#cells").html(result_html);
+        }
         
 
     </script>

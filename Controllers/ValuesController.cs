@@ -34,79 +34,131 @@ namespace TankWebObserver.Controllers
         public string Get()
         {
             //Thread.Sleep(100);
+            var map = _webSpectator?.Map;
             System.Collections.Generic.List<BaseInteractObject> mapObjects =
                 _webSpectator?.Map?.InteractObjects;
             var players = new System.Collections.Generic.List<Player>();
 
-            if (mapObjects != null)
+            string response = string.Empty;
+            if (map != null && 
+                    map.Cells != null &&
+                    map.InteractObjects != null)
             {
-                int index = 0;
-                foreach (var obj in mapObjects)
-                {
-                    if (obj is TankObject)
-                    {
-                        var tank = obj as TankObject;
-                        players.Add(
-                            new Player(index, tank.Nickname, tank.Score,
-                            tank.Hp, tank.MaximumHp, tank.Rectangle.LeftCorner));
-                        ++index;
-                    }
-                }
+                response = ResponseString(map.Cells, mapObjects);
             }
-            else
-            {
-                players.Add(new Player(-1, "DefaultNone", 0, 0, 0, new Point(-1, -1)));
-            }
-
-            return ToHTMLString(players);
+            
+            return response;
         }
 
-        private string ToHTML(System.Collections.Generic.List<Player> players)
+        private string PlayersToString(System.Collections.Generic.List<Player> players)
         {
-            System.Text.StringBuilder html = new System.Text.StringBuilder();
-            html.Append(
-                "<table><th>Id</th><th>Nickname</th><th>Score</th><th>Hp</th><th>MaxHp</th><th>Tank position</th>");
-
-            foreach (var player in players)
-            {
-                html.AppendFormat("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}{15}{16}{17}{18}{19}",  
-                    "<tr>",
-                    "<td>", player.Id, "</td>",
-                    "<td>", player.Nickname, "</td>",
-                    "<td>", player.Score, "</td>",
-                    "<td>", player.Hp, "</td>",
-                    "<td>", player.MaxHp, "</td>",
-                    "<td>", player.LeftCorner.ToString(), "</td>",
-                    "</tr>");
-            }
-            html.Append("</table>");
-            return html.ToString();
-        }
-
-        private string ToHTMLString(System.Collections.Generic.List<Player> players)
-        {
-            string result = "";
+            var result = new System.Text.StringBuilder();
             if (players.Count > 0)
             {
                 int i;
                 int length = (players.Count - 1);
                 for (i = 0; i < length; i++)
                 {
-                    result += players[i].ToString() + "|";
+                    result.Append(players[i].ToString());
+                    result.Append('|');
                 }
-                result += players[length].ToString();
+                result.Append(players[length].ToString());
             }
-            return result;
+            return result.ToString();
         }
 
-        // GET api/values
-        //public System.Collections.Generic.IEnumerable<Player> GetPlayers()
-        //{
-        //    return context;
-        //}
-
-        // GET api/values/5
+        private string InteractObjectsToString(System.Collections.Generic.List<InteractObject> interactObjects)
+        {
+            var result = new System.Text.StringBuilder();
+            if (interactObjects.Count > 0)
+            {
+                int i, length = interactObjects.Count - 1;
+                for (i = 0; i < length; i++)
+                {
+                    result.Append(interactObjects[i].ToString());
+                    result.Append('|');
+                }
+                result.Append(interactObjects[i].ToString());
+            }
+            return result.ToString();
+        }
         
+        private string CellsToString(TankCommon.Enum.CellMapType[,] cells)
+        {
+            var result = new System.Text.StringBuilder();
+            int r, c;
+            int rowLength = cells.GetLength(0);
+            int columnLength = cells.GetLength(1);
+            result.AppendFormat("{0}|{1}", rowLength, columnLength);
+            result.Append("+");
+            if (rowLength > 0 && columnLength > 0)
+            {
+                for (r = 0; r < rowLength; r++)
+                {
+                    for (c = 0; c < columnLength; c++)
+                    {
+                        result.Append(((int)cells[r, c]).ToString());
+                        result.Append('|');
+                    }
+                }
+            }
+            return result.ToString();
+        }
+
+        private string ResponseString(TankCommon.Enum.CellMapType[,] cells,
+            System.Collections.Generic.List<BaseInteractObject> interactObjects)
+        {
+            var result = new System.Text.StringBuilder();
+            int index = 0;
+            var playersList = new System.Collections.Generic.List<Player>();
+            var interactObjectsList = new System.Collections.Generic.List<InteractObject>();
+            foreach (var obj in interactObjects)
+            {
+                if (obj is TankObject)
+                {
+                    var tank = obj as TankObject;
+                    playersList.Add(
+                        new Player(index, tank.Nickname, tank.Score,
+                        tank.Hp, tank.MaximumHp, tank.Rectangle.LeftCorner));
+                    ++index;
+                }
+                else
+                {
+                    string type = string.Empty;
+
+                    if (obj is HealthUpgradeObject sobj)
+                    {
+                        type = "HealthUpgradeObject";
+                    }
+                    else if (obj is BulletSpeedUpgradeObject bsobj)
+                    {
+                        type = "BulletSpeedUpgradeObject";
+                    }
+                    else if (obj is DamageUpgradeObject duobj)
+                    {
+                        type = "DamageUpgradeObject";
+                    }
+                    else if (obj is SpeedUpgradeObject suobj)
+                    {
+                        type = "SpeedUpgradeObject";
+                    }
+                    else if (obj is MaxHpUpgradeObject mhuobj)
+                    {
+                        type = "MaxHpUpgradeObject";
+                    }
+
+                    interactObjectsList.Add(new InteractObject(type, obj.Rectangle.LeftCorner));
+                }
+            }
+
+            result.Append(PlayersToString(playersList));
+            result.Append("+");
+            result.Append(CellsToString(cells));
+            result.Append("+");
+            result.Append(InteractObjectsToString(interactObjectsList));
+
+            return result.ToString();
+        }
 
         // POST api/values
         [HttpPost]

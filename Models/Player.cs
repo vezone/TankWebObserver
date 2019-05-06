@@ -1,6 +1,4 @@
-﻿using TankCommon.Objects;
-
-namespace TankWebObserver.Models
+﻿namespace TankWebObserver.Models
 {
     public class Player
     {
@@ -9,10 +7,10 @@ namespace TankWebObserver.Models
         public decimal Score { get;set; }
         public decimal Hp { get; set; }
         public decimal MaxHp { get; set; }
-        public Point LeftCorner { get; set; }
+        public TankCommon.Objects.Point LeftCorner { get; set; }
 
         public Player(int id, string nickname, decimal score, 
-            decimal hp, decimal maxHp, Point leftCorner)
+            decimal hp, decimal maxHp, TankCommon.Objects.Point leftCorner)
         {
             Id = id;
             Nickname = nickname;
